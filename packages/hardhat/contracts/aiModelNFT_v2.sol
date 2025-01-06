@@ -1,30 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
+
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
-// TODO
-// 1. Do I need to inherit OnlyOwner from OpenZeppelin?
-// 2. How to handle IPFS hash (link) and private-public keys (should they be transfered?)
-// 3. How to facilitate the exchange of private-public keys?
-// 4. Maybe make a functionality which doesn't set an owner of an AiModel instead making it open source?
-// 5. Override ERC721 of openzeppelin in order to check if AiModel is valid
 
 
 ///////////////// Contract /////////////////
 contract AIModelNFT is ERC721 {
 
-	constructor() public ERC721("AIModelNFT", "AINFT") {}
+	constructor(address _marketplace) ERC721("AIModelNFT", "AINFT") {
+    marketplaceAddr = _marketplace;
+  }
 
 	///////////////// Variable /////////////////
 	uint256 private _tokenIdCounter;
-	function _baseURI() internal view virtual override returns (string memory){
-        	return "ipfs://";
-	}
-	struct AiModel{
+  address public marketplaceAddr;
+
+  struct AiModel{
 		address owner;
 		uint256 watermarkId;
-		string modelIpfsHash;
+		string ipfsHash;
 		address[] previous_owners;
 		string[] previous_versions; // store previous IPFS file links
 		uint256 id;
@@ -33,31 +28,52 @@ contract AIModelNFT is ERC721 {
 	AiModel[] private aiModelStorage;
 
 	///////////////// View Functions /////////////////
-	function isOwner(
-		uint256 _id
-	) public view returns(bool) {
+	function _baseURI()
+    internal
+    view
+    virtual
+    override
+    returns (string memory)
+  {
+    return "ipfs://";
+	}
+
+  function isOwner(uint256 _id)
+    public
+    view
+    returns(bool)
+  {
 		return (
 			aiModelStorage[_id].owner == msg.sender
 		);
 	}
 
-	function isOwnerAndValid(
-		uint256 _id
-	) public view returns(bool) {
+	function isOwnerAndValid(uint256 _id)
+    public
+    view
+    returns(bool)
+  {
 		return (
 			aiModelStorage[_id].owner == msg.sender && aiModelStorage[_id].valid
 		);
 	}
 
-	function isValid(
-		uint256 _id
-	) public view returns(bool) {
+	function isValid(uint256 _id)
+    public
+    view
+    returns(bool)
+  {
 		return (
 			aiModelStorage[_id].valid
 		);
 	}
 
-	function getAiModelStorage() public view returns(AiModel[] memory) {
+
+	function getAiModelStorage()
+    public
+    view
+    returns(AiModel[] memory)
+  {
 		return aiModelStorage;
 	}
 

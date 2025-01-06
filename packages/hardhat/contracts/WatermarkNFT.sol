@@ -21,13 +21,13 @@ contract WatermarkNFT is ERC721 {
 	}
 	Watermark[] private WatermarkStorage;
 
-	function isValid(
-		uint256 _id
-	) public view returns(bool) {
-		return (
-			Watermark[_id].valid
-		);
-	}
+	// function isValid(
+	// 	uint256 _id
+	// ) public view returns(bool) {
+	// 	return (
+	// 		Watermark[_id].valid
+	// 	);
+	// }
 
 	function getWatermarkStorage() public view returns(Watermark[] memory) {
 		return WatermarkStorage;
@@ -85,23 +85,6 @@ contract WatermarkNFT is ERC721 {
 		revert("Watermarks cannot be transferred");
 	}
 
-	function safeTransferFrom(
-		address _from,
-		address _to,
-		uint256 _tokenId
-	) public override(ERC721) {
-		revert("Watermarks cannot be transferred");
-	}
-
-	function safeTransferFrom(
-		address _from,
-		address _to,
-		uint256 _tokenId,
-		bytes memory _data
-	) public override(ERC721) {
-		revert("Watermarks cannot be transferred");
-	}
-
-        fallback() external payable {}
+  fallback() external payable {}
 	receive() external payable {}
 }
