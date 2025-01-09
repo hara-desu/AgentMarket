@@ -138,7 +138,7 @@ contract AIModelNFT is ERC721 {
     return
       _owner == _spender ||
       super.isApprovedForAll(_owner, _spender) ||
-      super.getApproved(_id) == _spender;
+      getApproved(_id) == _spender;
   }
 
   ///////////////// Events ////////////////////

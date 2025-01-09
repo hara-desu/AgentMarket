@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   11155111: {
     AIModelNFT: {
-      address: "0x806b8a7F37710F0ef2a0A94e695E9f95B61e2c8c",
+      address: "0xf527Abcb4B53fd92900b257bB4b2F7C1e45Ae3A3",
       abi: [
         {
           inputs: [
