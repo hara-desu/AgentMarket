@@ -8,7 +8,7 @@ const deployAiModelNFTContract: DeployFunction = async function (hre: HardhatRun
 
   await deploy("AIModelNFT", {
     from: deployer,
-    args: [],
+    args: ["0xda70F639c65a32deCef5Fb8Fa9C40F21Dc03F2Ca"],
     log: true,
     autoMine: true,
   });

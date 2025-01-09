@@ -1,0 +1,6 @@
+TODO
+
+* Fix approve, getApproved
+* burn function first requires mestask wallet approval and then reverts. Should revert first if person isn't the owner of the token. Same with updateVersion. Same with transfers.
+* How to handle IPFS hash (link) and private-public keys (should they be transfered?)
+* How to facilitate the exchange of private-public keys?
