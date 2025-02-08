@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
-import { useEffect, useState, useMemo } from "react";
-import { useAccount } from "wagmi";
+import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-
+import { useAccount } from "wagmi";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 interface AiAgent {
   owner: string;
@@ -26,16 +25,17 @@ interface Auction {
 }
 
 const Auctions = () => {
-  const { address: connectedAddress } = useAccount();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [buyAgentId, setBuyAgentId] = useState<bigint>(BigInt(0));
-  const [agentDetails, setAgentDetails] = useState<Record<string, { name: string, description: string, docker: string }>>({});
+  const [agentDetails, setAgentDetails] = useState<
+    Record<string, { name: string; description: string; docker: string }>
+  >({});
 
-  const {data: auctionStorage} = useScaffoldReadContract({
+  const { data: auctionStorage } = useScaffoldReadContract({
     contractName: "DutchAuction",
-    functionName: "getAuctionStorage"
-  })
-  
+    functionName: "getAuctionStorage",
+  });
+
   const { writeContractAsync: writeDutchAuctionAsync } = useScaffoldWriteContract({
     contractName: "DutchAuction",
   });
@@ -56,14 +56,14 @@ const Auctions = () => {
   };
 
   const formatEther = (wei: bigint) => {
-    return ethers.formatEther(wei); 
+    return ethers.formatEther(wei);
   };
 
   const fetchAgentDetails = async (agent: AiAgent) => {
     try {
       const response = await fetch(agent.ipfsLink.toString());
       const data = await response.json();
-      setAgentDetails((prev) => ({
+      setAgentDetails(prev => ({
         ...prev,
         [agent.id.toString()]: { name: data.name, description: data.description, docker: data.docker },
       }));
@@ -73,48 +73,46 @@ const Auctions = () => {
   };
 
   const handleBuy = async (agentId: bigint) => {
-      setBuyAgentId(agentId);
-      try {
-          if (!currentPrice || BigInt(currentPrice.toString()) <= 0) {
-            console.log("Invalid price fetched:", currentPrice);
-            return;
-          }
-
-          await writeDutchAuctionAsync({
-              functionName: "buy",
-              args: [agentId],
-              value: BigInt(currentPrice.toString()),
-          });
-      } catch (error) {
-          console.log("Error when trying to buy:", error);
+    setBuyAgentId(agentId);
+    try {
+      if (!currentPrice || BigInt(currentPrice.toString()) <= 0) {
+        console.log("Invalid price fetched:", currentPrice);
+        return;
       }
+
+      await writeDutchAuctionAsync({
+        functionName: "buy",
+        args: [agentId],
+        value: BigInt(currentPrice.toString()),
+      });
+    } catch (error) {
+      console.log("Error when trying to buy:", error);
+    }
   };
 
   useEffect(() => {
     if (auctionStorage) {
-      const mutableAuctions = auctionStorage
-        .map((auction: Auction) => ({
-          agentId: auction.agentId || BigInt(0),
-          seller: auction.seller || "",
-          startingPrice: auction.startingPrice || BigInt(0),
-          startAt: auction.startAt || BigInt(0),
-          expiresAt: auction.expiresAt || BigInt(0),
-          discountRate: auction.discountRate || BigInt(0),
-          onGoing: auction.onGoing ?? false,
-        }))
+      const mutableAuctions = auctionStorage.map((auction: Auction) => ({
+        agentId: auction.agentId || BigInt(0),
+        seller: auction.seller || "",
+        startingPrice: auction.startingPrice || BigInt(0),
+        startAt: auction.startAt || BigInt(0),
+        expiresAt: auction.expiresAt || BigInt(0),
+        discountRate: auction.discountRate || BigInt(0),
+        onGoing: auction.onGoing ?? false,
+      }));
       setAuctions(mutableAuctions);
     }
 
     if (aiAgentStorage) {
-      const agents = aiAgentStorage
-        .map((agent) => ({
-          owner: agent.owner || "",
-          ipfsLink: agent.ipfsLink || "",
-          previous_owners: Array.isArray(agent.previous_owners) ? [...agent.previous_owners] : [],
-          previous_versions: Array.isArray(agent.previous_versions) ? [...agent.previous_versions] : [],
-          id: agent.id || BigInt(0),
-          valid: agent.valid ?? false,
-        }))
+      const agents = aiAgentStorage.map(agent => ({
+        owner: agent.owner || "",
+        ipfsLink: agent.ipfsLink || "",
+        previous_owners: Array.isArray(agent.previous_owners) ? [...agent.previous_owners] : [],
+        previous_versions: Array.isArray(agent.previous_versions) ? [...agent.previous_versions] : [],
+        id: agent.id || BigInt(0),
+        valid: agent.valid ?? false,
+      }));
       agents.forEach(fetchAgentDetails);
     }
   }, [auctionStorage, aiAgentStorage]);
@@ -127,17 +125,37 @@ const Auctions = () => {
             <ul className="grid grid-cols-1 md:grid-cols-4 gap-2">
               {auctions.map((auction: Auction) => (
                 <li key={auction.agentId.toString()} className="bg-gray-300 p-4 rounded-lg shadow-md bg-opacity-50">
-                  <p><strong>Agent ID: </strong>{auction.agentId.toString()} </p>
-                  <p><strong>Seller: </strong>{auction.seller.toString()} </p>
-                  <p><strong>Agent name: </strong> 
+                  <p>
+                    <strong>Agent ID: </strong>
+                    {auction.agentId.toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Seller: </strong>
+                    {auction.seller.toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Agent name: </strong>
                     {agentDetails[auction.agentId.toString()]?.name || "Loading"}
                   </p>
-                  <p><strong>Description:</strong> {agentDetails[auction.agentId.toString()]?.description || "Loading..."}</p>
-                  <p><strong>Starting Price: </strong> {formatEther(auction.startingPrice).toString()} </p>
-                  <p><strong>Start At: </strong> {formatTimestamp(auction.startAt).toString()} </p>
-                  <p><strong>Expires At: </strong> {formatTimestamp(auction.expiresAt).toString()} </p>
-                  <p><strong>Discount Rate: </strong> {formatEther(auction.discountRate).toString()} </p>
-                  <p><strong>Ongoing: </strong> {auction.onGoing.toString()} </p>
+                  <p>
+                    <strong>Description:</strong>{" "}
+                    {agentDetails[auction.agentId.toString()]?.description || "Loading..."}
+                  </p>
+                  <p>
+                    <strong>Starting Price: </strong> {formatEther(auction.startingPrice).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Start At: </strong> {formatTimestamp(auction.startAt).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Expires At: </strong> {formatTimestamp(auction.expiresAt).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Discount Rate: </strong> {formatEther(auction.discountRate).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Ongoing: </strong> {auction.onGoing.toString()}{" "}
+                  </p>
                   <p>
                     <a
                       href={agentDetails[auction.agentId.toString()]?.docker}
@@ -155,7 +173,7 @@ const Auctions = () => {
                     className="px-4 py-2 text-white rounded w-full mt-2 bg-blue-300 hover:bg-gray-400"
                   >
                     Buy
-                  </button>               
+                  </button>
                 </li>
               ))}
             </ul>
@@ -166,6 +184,6 @@ const Auctions = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Auctions;

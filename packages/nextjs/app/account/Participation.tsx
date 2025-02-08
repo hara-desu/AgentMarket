@@ -1,9 +1,9 @@
 "use client";
 
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
 import { ethers } from "ethers";
+import { useAccount } from "wagmi";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 interface AiAgent {
   owner: string;
@@ -27,12 +27,14 @@ interface Auction {
 export function Participation() {
   const { address: connectedAddress } = useAccount();
   const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [agentDetails, setAgentDetails] = useState<Record<string, { name: string, description: string, docker: string }>>({});
-  
-  const {data: auctionStorage} = useScaffoldReadContract({
+  const [agentDetails, setAgentDetails] = useState<
+    Record<string, { name: string; description: string; docker: string }>
+  >({});
+
+  const { data: auctionStorage } = useScaffoldReadContract({
     contractName: "DutchAuction",
-    functionName: "getAuctionStorage"
-  })
+    functionName: "getAuctionStorage",
+  });
 
   const { data: aiAgentStorage } = useScaffoldReadContract({
     contractName: "AIagentNFT",
@@ -51,7 +53,7 @@ export function Participation() {
     try {
       const response = await fetch(agent.ipfsLink.toString());
       const data = await response.json();
-      setAgentDetails((prev) => ({
+      setAgentDetails(prev => ({
         ...prev,
         [agent.id.toString()]: { name: data.name, description: data.description, docker: data.docker },
       }));
@@ -63,7 +65,7 @@ export function Participation() {
   useEffect(() => {
     if (auctionStorage) {
       const mutableAuctions = auctionStorage
-        .map((auction) => ({
+        .map(auction => ({
           agentId: auction.agentId || BigInt(0),
           seller: auction.seller || "",
           startingPrice: auction.startingPrice || BigInt(0),
@@ -78,7 +80,7 @@ export function Participation() {
 
     if (aiAgentStorage) {
       const filteredAgents = aiAgentStorage
-        .map((agent) => ({
+        .map(agent => ({
           owner: agent.owner || "",
           ipfsLink: agent.ipfsLink || "",
           previous_owners: Array.isArray(agent.previous_owners) ? [...agent.previous_owners] : [],
@@ -89,7 +91,6 @@ export function Participation() {
         .filter(agent => agent.owner === connectedAddress);
       filteredAgents.forEach(fetchAgentDetails);
     }
-
   }, [aiAgentStorage, auctionStorage, connectedAddress]);
 
   return (
@@ -99,18 +100,38 @@ export function Participation() {
         <div>
           {auctions.length > 0 ? (
             <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {auctions.map((auction) => (
-                <li key={auction.agentId.toString()} className="bg-gray-300 p-4 w-80 rounded-lg shadow-md bg-opacity-50">
-                  <p><strong>Agent ID: </strong>{auction.agentId.toString()} </p>
-                  <p><strong>Agent name: </strong> 
+              {auctions.map(auction => (
+                <li
+                  key={auction.agentId.toString()}
+                  className="bg-gray-300 p-4 w-80 rounded-lg shadow-md bg-opacity-50"
+                >
+                  <p>
+                    <strong>Agent ID: </strong>
+                    {auction.agentId.toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Agent name: </strong>
                     {agentDetails[auction.agentId.toString()]?.name || "Loading"}
                   </p>
-                  <p><strong>Description:</strong> {agentDetails[auction.agentId.toString()]?.description || "Loading..."}</p>
-                  <p><strong>Starting Price: </strong> {formatEther(auction.startingPrice).toString()} </p>
-                  <p><strong>Start At: </strong> {formatTimestamp(auction.startAt).toString()} </p>
-                  <p><strong>Expires At: </strong> {formatTimestamp(auction.expiresAt).toString()} </p>
-                  <p><strong>Discount Rate: </strong> {formatEther(auction.discountRate).toString()} </p>
-                  <p><strong>Ongoing: </strong> {auction.onGoing.toString()} </p>
+                  <p>
+                    <strong>Description:</strong>{" "}
+                    {agentDetails[auction.agentId.toString()]?.description || "Loading..."}
+                  </p>
+                  <p>
+                    <strong>Starting Price: </strong> {formatEther(auction.startingPrice).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Start At: </strong> {formatTimestamp(auction.startAt).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Expires At: </strong> {formatTimestamp(auction.expiresAt).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Discount Rate: </strong> {formatEther(auction.discountRate).toString()}{" "}
+                  </p>
+                  <p>
+                    <strong>Ongoing: </strong> {auction.onGoing.toString()}{" "}
+                  </p>
                   <p>
                     <a
                       href={agentDetails[auction.agentId.toString()]?.docker}
@@ -125,7 +146,7 @@ export function Participation() {
               ))}
             </ul>
           ) : (
-            <h1 className="text-xl text-red-400">You aren't selling any AI agents.</h1>
+            <h1 className="text-xl text-red-400">You are not selling any AI agents.</h1>
           )}
         </div>
       </div>

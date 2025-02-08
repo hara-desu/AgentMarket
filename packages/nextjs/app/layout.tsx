@@ -4,7 +4,10 @@ import { ThemeProvider } from "~~/components/ThemeProvider";
 import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
-export const metadata = getMetadata({ title: "Agent Market", description: "A decentralized auction marketplace for AI agents." });
+export const metadata = getMetadata({
+  title: "Agent Market",
+  description: "A decentralized auction marketplace for AI agents.",
+});
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (

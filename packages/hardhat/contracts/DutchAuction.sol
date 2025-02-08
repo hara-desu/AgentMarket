@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import "hardhat/console.sol";
 import "./AIagentNFT.sol";
 
-
 /////////////  Contract  /////////////
 contract DutchAuction {
     /////////////  Structs  /////////////
@@ -26,8 +25,8 @@ contract DutchAuction {
     constructor(address payable _nftContract) {
         ///////////// Link the Marketplace to the NFT Contract
         nftContract = AIagentNFT(_nftContract);
-        nftContractAddr = _nftContract;       
-    }    
+        nftContractAddr = _nftContract;
+    }
 
     /////////////  Modifiers /////////////
     modifier isOwnerAndValid(address _owner, uint256 _token) {
@@ -49,10 +48,7 @@ contract DutchAuction {
     }
 
     modifier onGoing(uint256 _token) {
-        require(
-            auctions[_token].onGoing == true,
-            "The auction isn't active."
-        );
+        require(auctions[_token].onGoing == true, "The auction isn't active.");
         _;
     }
 
@@ -66,27 +62,22 @@ contract DutchAuction {
         uint256 DiscountRate
     );
 
-    event auctionEnded(
-        uint256 AgentId,
-        address Seller,
-        address Buyer,
-        uint256 Price
-    );
+    event auctionEnded(uint256 AgentId, address Seller, address Buyer, uint256 Price);
 
     ///////////// View Functions //////////
-    function getAddress() public view returns(address) {
+    function getAddress() public view returns (address) {
         return address(this);
     }
-    
-    function auctionActive(uint256 _tokenId) public view returns(bool) {
+
+    function auctionActive(uint256 _tokenId) public view returns (bool) {
         return auctions[_tokenId].onGoing;
     }
 
-    function getAuction(uint256 _id) public view returns(Auction memory) {
+    function getAuction(uint256 _id) public view returns (Auction memory) {
         return auctions[_id];
     }
 
-    function getAuctionStorage() public view returns(Auction[] memory) {
+    function getAuctionStorage() public view returns (Auction[] memory) {
         return auctionStorage;
     }
 
@@ -96,7 +87,7 @@ contract DutchAuction {
             return 0;
         } else {
             return block.timestamp - auctions[_AIagentId].startAt;
-        }  
+        }
     }
 
     /////////////  Functions  /////////////
@@ -109,22 +100,16 @@ contract DutchAuction {
     ) public isOwnerAndValid(msg.sender, _AIagentId) {
         ///////////// Start Auction
         ///////////// Ensure that the auction expiry time is greater than block.timestamp
-        require(
-            _duration > 0,
-            "Auction duration can't be zero!"
-        );
-        require(
-            _startingPrice >= _discountRate * _duration,
-            "Starting price is less than discount rate."
-        );
+        require(_duration > 0, "Auction duration can't be zero!");
+        require(_startingPrice >= _discountRate * _duration, "Starting price is less than discount rate.");
         auctions[_AIagentId].agentId = _AIagentId;
         auctions[_AIagentId].seller = msg.sender;
         auctions[_AIagentId].startingPrice = _startingPrice;
         auctions[_AIagentId].startAt = block.timestamp;
         auctions[_AIagentId].expiresAt = block.timestamp + _duration;
         auctions[_AIagentId].discountRate = _discountRate;
-        auctions[_AIagentId].onGoing = true; 
-        auctionStorage.push(auctions[_AIagentId]);    
+        auctions[_AIagentId].onGoing = true;
+        auctionStorage.push(auctions[_AIagentId]);
 
         emit auctionStarted(
             _AIagentId,
@@ -133,7 +118,7 @@ contract DutchAuction {
             auctions[_AIagentId].expiresAt,
             _startingPrice,
             _discountRate
-        );                
+        );
     }
 
     function getPrice(uint256 _AIagentId) public view isValid(_AIagentId) onGoing(_AIagentId) returns (uint256) {
@@ -145,11 +130,8 @@ contract DutchAuction {
     function buy(uint256 _AIagentId) public payable isValid(_AIagentId) onGoing(_AIagentId) {
         ///////////// End the auction
 
-        require(
-            block.timestamp < auctions[_AIagentId].expiresAt, 
-            "Auction has already expired."
-        );
-        
+        require(block.timestamp < auctions[_AIagentId].expiresAt, "Auction has already expired.");
+
         uint256 price = getPrice(_AIagentId);
         require(msg.value >= price, "Should bid higher than the current price.");
 
@@ -160,11 +142,7 @@ contract DutchAuction {
 
         payable(address(auctions[_AIagentId].seller)).transfer(price);
 
-        nftContract.transferFrom(
-          auctions[_AIagentId].seller,
-          msg.sender,
-          _AIagentId
-        );
+        nftContract.transferFrom(auctions[_AIagentId].seller, msg.sender, _AIagentId);
 
         uint256 length = auctionStorage.length;
 
@@ -178,14 +156,8 @@ contract DutchAuction {
 
         delete auctions[_AIagentId];
 
-        emit auctionEnded(
-            _AIagentId,           
-            auctions[_AIagentId].seller,
-            msg.sender,
-            price
-        );
+        emit auctionEnded(_AIagentId, auctions[_AIagentId].seller, msg.sender, price);
     }
-
 
     receive() external payable {}
     fallback() external payable {}

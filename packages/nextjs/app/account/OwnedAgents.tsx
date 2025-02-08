@@ -1,11 +1,11 @@
-import { useAccount } from "wagmi";
-import { useScaffoldWriteContract, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { useEffect, useState } from "react";
 import NftInteract from "./NftInteract";
 import { ethers } from "ethers";
+import { useAccount } from "wagmi";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 // TODO:
-// Before selling an NFT I should approve the smart contract transfering that NFT 
+// Before selling an NFT I should approve the smart contract transfering that NFT
 
 interface AiAgent {
   owner: string;
@@ -17,11 +17,10 @@ interface AiAgent {
 }
 
 interface AuctionActive {
-  seller: string,
+  seller: string;
   agentId: bigint;
   onGoing: boolean;
 }
-
 
 export function OwnedAgents() {
   const { address: connectedAddress } = useAccount();
@@ -31,7 +30,9 @@ export function OwnedAgents() {
   const [discountRate, setDiscountRate] = useState("");
   const [duration, setDuration] = useState<bigint>(BigInt(0));
   const [auctionActive, setAuctionActive] = useState<AuctionActive[]>([]);
-  const [agentDetails, setAgentDetails] = useState<Record<string, { name: string, description: string, docker: string }>>({});
+  const [agentDetails, setAgentDetails] = useState<
+    Record<string, { name: string; description: string; docker: string }>
+  >({});
   const [sellActive, setSellActive] = useState<boolean>(false);
 
   const { data: aiAgentStorage } = useScaffoldReadContract({
@@ -39,9 +40,9 @@ export function OwnedAgents() {
     functionName: "getAiAgentStorage",
   });
 
-  const {data: AIagentNFTaddr} = useScaffoldReadContract({
+  const { data: AIagentNFTaddr } = useScaffoldReadContract({
     contractName: "AIagentNFT",
-    functionName: "getAddress"
+    functionName: "getAddress",
   });
 
   const { writeContractAsync: writeDutchAuctionAsync } = useScaffoldWriteContract({
@@ -50,12 +51,12 @@ export function OwnedAgents() {
 
   const { writeContractAsync: writeAIagentNFTAsync } = useScaffoldWriteContract({
     contractName: "AIagentNFT",
-  }); 
+  });
 
-  const {data: auctionStorage} = useScaffoldReadContract({
+  const { data: auctionStorage } = useScaffoldReadContract({
     contractName: "DutchAuction",
-    functionName: "getAuctionStorage"
-  })
+    functionName: "getAuctionStorage",
+  });
 
   const etherToWei = (ether: string) => {
     return ethers.parseEther(ether);
@@ -67,7 +68,7 @@ export function OwnedAgents() {
       if (AIagentNFTaddr) {
         await writeAIagentNFTAsync({
           functionName: "approve",
-          args: [AIagentNFTaddr, agentId]
+          args: [AIagentNFTaddr, agentId],
         });
       }
 
@@ -87,7 +88,7 @@ export function OwnedAgents() {
     try {
       const response = await fetch(agent.ipfsLink.toString());
       const data = await response.json();
-      setAgentDetails((prev) => ({
+      setAgentDetails(prev => ({
         ...prev,
         [agent.id.toString()]: { name: data.name, description: data.description, docker: data.docker },
       }));
@@ -99,7 +100,7 @@ export function OwnedAgents() {
   useEffect(() => {
     if (aiAgentStorage) {
       const filteredAgents = aiAgentStorage
-        .map((agent) => ({
+        .map(agent => ({
           owner: agent.owner || "",
           ipfsLink: agent.ipfsLink || "",
           previous_owners: Array.isArray(agent.previous_owners) ? [...agent.previous_owners] : [],
@@ -113,7 +114,7 @@ export function OwnedAgents() {
 
       if (auctionStorage) {
         const activeAuction = auctionStorage
-          .map((auction) => ({
+          .map(auction => ({
             seller: auction.seller || "",
             agentId: auction.agentId || BigInt(0),
             onGoing: auction.onGoing ?? false,
@@ -133,22 +134,22 @@ export function OwnedAgents() {
         <div>
           {aiAgents.length > 0 ? (
             <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {aiAgents.map((agent) => (
+              {aiAgents.map(agent => (
                 <li key={agent.id.toString()} className="bg-gray-300 p-4 rounded-lg shadow-md bg-opacity-50">
                   {/* Sell agent button */}
                   <button
                     onClick={() => setActiveAgentId(agent.id)}
-                    disabled={auctionActive.some((auction) => auction.agentId === agent.id && auction.onGoing)}
+                    disabled={auctionActive.some(auction => auction.agentId === agent.id && auction.onGoing)}
                     className={`px-4 py-2 text-white rounded w-full mt-2 
-                      ${auctionActive.some((auction) => auction.agentId === agent.id && auction.onGoing)
-                        ? "bg-blue-300 cursor-not-allowed" 
-                        : "bg-blue-300 hover:bg-gray-400" 
+                      ${
+                        auctionActive.some(auction => auction.agentId === agent.id && auction.onGoing)
+                          ? "bg-blue-300 cursor-not-allowed"
+                          : "bg-blue-300 hover:bg-gray-400"
                       }`}
                   >
-                    {auctionActive.some((auction) => auction.agentId === agent.id && auction.onGoing)
+                    {auctionActive.some(auction => auction.agentId === agent.id && auction.onGoing)
                       ? "Auctioning"
-                      : "Sell" 
-                    }
+                      : "Sell"}
                   </button>
 
                   {activeAgentId === agent.id && (
@@ -162,7 +163,7 @@ export function OwnedAgents() {
                           type="number"
                           placeholder="Starting price"
                           value={startingPrice.toString()}
-                          onChange={(e) => setStartingPrice((e.target.value).toString())}
+                          onChange={e => setStartingPrice(e.target.value.toString())}
                           className="bg-white text-gray-600 border p-2 mb-2 w-full"
                         />
                         <p className="text-gray-600">Discount rate (ETH)</p>
@@ -170,7 +171,7 @@ export function OwnedAgents() {
                           type="number"
                           placeholder="Discount rate"
                           value={discountRate.toString()}
-                          onChange={(e) => setDiscountRate((e.target.value).toString())}
+                          onChange={e => setDiscountRate(e.target.value.toString())}
                           className="bg-white text-gray-600 border p-2 mb-2 w-full"
                         />
                         <p className="text-gray-600">Duration (in seconds)</p>
@@ -178,7 +179,7 @@ export function OwnedAgents() {
                           type="number"
                           placeholder="Duration in sec"
                           value={duration.toString()}
-                          onChange={(e) => setDuration(BigInt(e.target.value))}
+                          onChange={e => setDuration(BigInt(e.target.value))}
                           className="bg-white text-gray-600 border p-2 mb-2 w-full"
                         />
                         <button
@@ -198,32 +199,31 @@ export function OwnedAgents() {
                       </div>
                     </div>
                   )}
-                  
-                  <p><strong>ID:</strong> {agent.id.toString()}</p>
-                  <p><strong>Name:</strong> {agentDetails[agent.id.toString()]?.name || "Loading..."}</p>
-                  <p><strong>Description:</strong> {agentDetails[agent.id.toString()]?.description || "Loading..."}</p>
+
+                  <p>
+                    <strong>ID:</strong> {agent.id.toString()}
+                  </p>
+                  <p>
+                    <strong>Name:</strong> {agentDetails[agent.id.toString()]?.name || "Loading..."}
+                  </p>
+                  <p>
+                    <strong>Description:</strong> {agentDetails[agent.id.toString()]?.description || "Loading..."}
+                  </p>
                   <p className="w-full break-words overflow-hidden">
                     <strong>Previous Owners:</strong> {agent.previous_owners.join(", ") || "None"}
                   </p>
                   <p>
                     <strong>Previous Versions:</strong>{" "}
-                    {agent.previous_versions.length > 0 ? (
-                      agent.previous_versions.map((link, index) => (
-                        <span key={index}>
-                          <a
-                            href={link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:underline"
-                          >
-                            Version {index + 1}
-                          </a>
-                          {index < agent.previous_versions.length - 1 && ", "}
-                        </span>
-                      ))
-                    ) : (
-                      "None"
-                    )}
+                    {agent.previous_versions.length > 0
+                      ? agent.previous_versions.map((link, index) => (
+                          <span key={index}>
+                            <a href={link} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                              Version {index + 1}
+                            </a>
+                            {index < agent.previous_versions.length - 1 && ", "}
+                          </span>
+                        ))
+                      : "None"}
                   </p>
                   <p>
                     <a

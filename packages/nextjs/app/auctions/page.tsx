@@ -1,9 +1,6 @@
+import Auctions from "./_components/Auctions";
 import type { NextPage } from "next";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
-import Auctions from "./_components/Auctions";
-import { useAccount } from "wagmi";
-import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
-import { notification } from "~~/utils/scaffold-eth";
 
 export const metadata = getMetadata({
   title: "Auctions",

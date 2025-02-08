@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
@@ -99,14 +98,14 @@ export const Header = () => {
             <div className="w-24 rounded-full">
               <img alt="Logo" src="/logo.jpeg" />
             </div>
-          </div>    
+          </div>
           <div className="flex flex-col">
-              <span style={{ fontSize: "24px" }}>Agent</span>
-              <span style={{ fontSize: "24px" }}>Market</span>
+            <span style={{ fontSize: "24px" }}>Agent</span>
+            <span style={{ fontSize: "24px" }}>Market</span>
           </div>
         </Link>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
-          <HeaderMenuLinks/>
+          <HeaderMenuLinks />
         </ul>
       </div>
       <div className="navbar-end flex-grow mr-4">

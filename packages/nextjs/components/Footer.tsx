@@ -1,11 +1,6 @@
 import React from "react";
-import Link from "next/link";
 import { hardhat } from "viem/chains";
-import { CurrencyDollarIcon, MagnifyingGlassIcon, PaperAirplaneIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { HeartIcon } from "@heroicons/react/24/outline";
 import { SwitchTheme } from "~~/components/SwitchTheme";
-import { BuidlGuidlLogo } from "~~/components/assets/BuidlGuidlLogo";
-import { Faucet } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useGlobalState } from "~~/services/store/store";
 
@@ -35,7 +30,7 @@ export const Footer = () => {
             <span>·</span>
             <div className="flex justify-center items-center gap-2">
               <p className="m-0 text-center">
-                <PaperAirplaneIcon className="inline-block h-4 w-4" /> My telegram @konyangichu
+                My telegram @konyangichu
               </p>
             </div>
             <span>·</span>
