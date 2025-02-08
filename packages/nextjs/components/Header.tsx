@@ -22,16 +22,9 @@ export const menuLinks: HeaderMenuLink[] = [
   {
     label: "Auctions",
     href: "/auctions",
-  },
+  }]
 
-  {
-    label: "Debug Contracts",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
-  },
-];
-
-export const HeaderMenuLinks = () => {
+  export const HeaderMenuLinks = () => {
   const pathname = usePathname();
 
   return (
