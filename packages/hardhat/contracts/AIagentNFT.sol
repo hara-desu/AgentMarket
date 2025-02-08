@@ -4,28 +4,28 @@ pragma solidity >=0.8.0 <0.9.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+// TODO:
+// 1. Do I edit owners mapping on transfer or on burn?
 
 ///////////////// Contract /////////////////
-contract AIModelNFT is ERC721 {
+contract AIagentNFT is ERC721 {
 
-	constructor(address _marketplace) ERC721("AIModelNFT", "AINFT") {
-    marketplaceAddr = _marketplace;
+	constructor() ERC721("AIagentNFT", "AINFT") {
   }
 
 	///////////////// Variables /////////////////
 	uint256 private _tokenIdCounter;
-  address public marketplaceAddr;
+  // address public marketplaceAddr;
 
-  struct AiModel{
+  struct AiAgent{
 		address owner;
-		uint256 watermarkId;
-		string ipfsHash;
+		string ipfsLink;
 		address[] previous_owners;
 		string[] previous_versions; // store previous IPFS file links
 		uint256 id;
 		bool valid;
 	}
-	AiModel[] public aiModelStorage;
+	AiAgent[] public aiAgentStorage;
   mapping(address => uint256[]) public owners;
   mapping(address owner => uint256) public balances;
   mapping(uint256 id => address) public tokenApprovals;
@@ -41,22 +41,26 @@ contract AIModelNFT is ERC721 {
     return "ipfs://";
 	}
 
-  function isOwner(uint256 _id)
-    public
-    view
-    indexOutOfBounds(_id)
-    returns(bool)
-  {
-    return aiModelStorage[_id].owner == msg.sender;
-	}
+  function getAddress() external view returns (address) {
+    return address(this);
+  }
 
-	function isOwnerAndValid(uint256 _id)
+  function isOwner(address _owner, uint256 _id)
     public
     view
     indexOutOfBounds(_id)
     returns(bool)
   {
-    return aiModelStorage[_id].owner == msg.sender && aiModelStorage[_id].valid;
+    return ownerOf(_id) == _owner;
+	}
+  
+	function isOwnerAndValid(address _owner, uint256 _id)
+    public
+    view
+    indexOutOfBounds(_id)
+    returns(bool)
+  { 
+    return ownerOf(_id) == _owner && aiAgentStorage[_id].valid;
 	}
 
 	function isValid(uint256 _id)
@@ -65,24 +69,24 @@ contract AIModelNFT is ERC721 {
     indexOutOfBounds(_id)
     returns(bool)
   {
-    return aiModelStorage[_id].valid;
+    return aiAgentStorage[_id].valid;
 	}
 
-	function getAiModelStorage()
+	function getAiAgentStorage()
     public
     view
-    returns(AiModel[] memory)
+    returns(AiAgent[] memory)
   {
-		return aiModelStorage;
+		return aiAgentStorage;
 	}
 
-	function getAiModel(uint256 _id)
+	function getAiAgent(uint256 _id)
     public
     view
     idValid(_id)
-    returns(AiModel memory)
+    returns(AiAgent memory)
   {
-		return aiModelStorage[_id];
+		return aiAgentStorage[_id];
 	}
 
 	function tokenURI(uint256 _id)
@@ -92,9 +96,7 @@ contract AIModelNFT is ERC721 {
     idValid(_id)
     returns(string memory)
   {
-		string memory baseURI = _baseURI();
-		string memory ipfsHash = aiModelStorage[_id].ipfsHash;
-		return bytes(baseURI).length > 0 ? string.concat(baseURI, ipfsHash) : "";
+    return aiAgentStorage[_id].ipfsLink;
 	}
 
   function ownerOf(uint256 _id)
@@ -104,7 +106,7 @@ contract AIModelNFT is ERC721 {
     idValid(_id)
     returns(address)
   {
-    return aiModelStorage[_id].owner;
+    return aiAgentStorage[_id].owner;
   }
 
   function balanceOf(address _owner)
@@ -117,7 +119,7 @@ contract AIModelNFT is ERC721 {
     return balances[_owner];
   }
 
-  function ownedAiModels(address _owner)
+  function ownedAiAgents(address _owner)
     public
     view
     notZeroAddress(_owner)
@@ -143,9 +145,9 @@ contract AIModelNFT is ERC721 {
 
   ///////////////// Events ////////////////////
   event Transfered(address _from, address _to, uint256 _id);
-  event AddedAiModel(address _owner, uint256 _id);
+  event AddedAiAgent(address _owner, uint256 _id);
   event Burned(address _owner, uint256 _id);
-  event VersionUpdate(address _owner, uint256 _id, string _ipfsHash);
+  event VersionUpdate(address _owner, uint256 _id, string _ipfsLink);
   event Approved(address _owner, address _operator, uint256 _id);
 
   ///////////////// Errors /////////////////
@@ -154,8 +156,8 @@ contract AIModelNFT is ERC721 {
   ///////////////// Modifiers /////////////////
   modifier idValid(uint256 _id) {
     require(
-      _id < aiModelStorage.length &&
-      aiModelStorage[_id].valid,
+      _id < aiAgentStorage.length &&
+      aiAgentStorage[_id].valid,
       "AI Model doesn't exist or has been removed from the storage."
     );
     _;
@@ -171,7 +173,7 @@ contract AIModelNFT is ERC721 {
 
   modifier indexOutOfBounds(uint256 _id) {
     require(
-      _id < aiModelStorage.length,
+      _id < aiAgentStorage.length,
       "Index out of storage bounds!"
     );
     _;
@@ -192,23 +194,22 @@ contract AIModelNFT is ERC721 {
 
 	///////////////// Functions /////////////////
 	// Check if can use calldata or storage instead of memory
-	function _setAiModel(
+	function _setAiAgent(
     address _owner,
-		string memory _ipfsHash,
-    uint256 _id,
-		uint256 _watermarkId
+		string memory _ipfsLink,
+    uint256 _id
   )
     internal
   {
-		AiModel memory aiModelInst;
-    aiModelInst.owner = _owner;
-    aiModelInst.ipfsHash = _ipfsHash;
-    aiModelInst.previous_owners = new address[](0);
-		aiModelInst.previous_versions = new string[](0);
-		aiModelInst.id = _id;
-		aiModelInst.watermarkId = _watermarkId;
-		aiModelInst.valid = true;
-		aiModelStorage.push(aiModelInst);
+		AiAgent memory aiAgentInst;
+    aiAgentInst.owner = _owner;
+
+    aiAgentInst.ipfsLink = _ipfsLink;
+    aiAgentInst.previous_owners = new address[](0);
+		aiAgentInst.previous_versions = new string[](0);
+		aiAgentInst.id = _id;
+		aiAgentInst.valid = true;
+		aiAgentStorage.push(aiAgentInst);
     owners[_owner].push(_id);
     balances[_owner] += 1;
 	}
@@ -222,10 +223,10 @@ contract AIModelNFT is ERC721 {
   )
     internal
     idValid(_id)
-    authorized(_prevOwner, msg.sender, _id)
+    authorized(_prevOwner, address(this), _id)
   {
-		aiModelStorage[_id].owner = _newOwner;
-		aiModelStorage[_id].previous_owners.push(_prevOwner);
+		aiAgentStorage[_id].owner = _newOwner;
+		aiAgentStorage[_id].previous_owners.push(_prevOwner);
     owners[_prevOwner].pop();
     owners[_newOwner].push(_id);
     balances[_prevOwner] -= 1;
@@ -234,53 +235,52 @@ contract AIModelNFT is ERC721 {
 
 	function _updateOnBurn(uint256 _id)
     internal
-    idValid(_id)
-    onlyOwner(_id)
   {
 		owners[msg.sender].pop();
     balances[msg.sender] -= 1;
-    delete aiModelStorage[_id];
+    delete aiAgentStorage[_id];
 		emit Transfer(msg.sender, address(0), _id);
 	}
 
-	function registerAiModel(
+	function registerAiAgent(
 		address _to,
-		string memory _ipfsHash,
-		uint256 _watermarkId
+		string memory _ipfsLink
 	)
     public
     returns(uint256)
   {
 		require(msg.sender == _to, "Only the owner can mint!");
-		_tokenIdCounter = aiModelStorage.length;
-		_setAiModel(_to, _ipfsHash, _tokenIdCounter, _watermarkId);
-		emit AddedAiModel(_to, _tokenIdCounter);
+		_tokenIdCounter = aiAgentStorage.length;
+		_setAiAgent(_to, _ipfsLink, _tokenIdCounter);
+		emit AddedAiAgent(_to, _tokenIdCounter);
     return _tokenIdCounter;
 	}
 
 	function burn(uint256 _id)
     public
-    returns(AiModel memory)
+    idValid(_id)
+    onlyOwner(_id)
+    returns(AiAgent memory)
   {
 		_updateOnBurn(_id);
 		emit Burned(msg.sender, _id);
-    return aiModelStorage[_id];
+    return aiAgentStorage[_id];
 	}
 
 	function updateVersion(
 		uint256 _id,
-		string memory _newIpfsHash
+		string memory _newIpfsLink
   )
     public
     idValid(_id)
     onlyOwner(_id)
-    returns(AiModel memory)
+    returns(AiAgent memory)
   {
-		string memory currentIpfsHash = aiModelStorage[_id].ipfsHash;
-		aiModelStorage[_id].previous_versions.push(currentIpfsHash);
-		aiModelStorage[_id].ipfsHash = _newIpfsHash;
-    emit VersionUpdate(msg.sender, _id, _newIpfsHash);
-		return aiModelStorage[_id];
+		string memory currentIpfsLink = aiAgentStorage[_id].ipfsLink;
+		aiAgentStorage[_id].previous_versions.push(currentIpfsLink);
+		aiAgentStorage[_id].ipfsLink = _newIpfsLink;
+    emit VersionUpdate(msg.sender, _id, _newIpfsLink);
+		return aiAgentStorage[_id];
 	}
 
 	function transferFrom(

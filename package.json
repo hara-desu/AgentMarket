@@ -42,7 +42,6 @@
     "start": "yarn workspace @se-2/nextjs dev",
     "test": "yarn hardhat:test",
     "vercel": "yarn workspace @se-2/nextjs vercel",
-    "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
     "verify": "yarn hardhat:verify"
   },
   "devDependencies": {
@@ -52,5 +51,13 @@
   "packageManager": "yarn@3.2.3",
   "engines": {
     "node": ">=18.18.0"
+  },
+  "dependencies": {
+    "ethers": "^6.13.5",
+    "eventemitter3": "^5.0.1",
+    "kubo-rpc-client": "^5.0.2",
+    "pinata-web3": "^0.5.4",
+    "react-json-view": "^1.21.3",
+    "vercel": "latest"
   }
 }
