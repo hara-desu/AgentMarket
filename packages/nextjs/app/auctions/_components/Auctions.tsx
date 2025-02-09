@@ -122,7 +122,7 @@ const Auctions = () => {
       <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
         <div>
           {auctions.length > 0 ? (
-            <ul className="grid grid-cols-1 md:grid-cols-4 gap-2">
+            <ul className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {auctions.map((auction: Auction) => (
                 <li key={auction.agentId.toString()} className="bg-gray-300 p-4 rounded-lg shadow-md bg-opacity-50">
                   <p>
@@ -152,9 +152,6 @@ const Auctions = () => {
                   </p>
                   <p>
                     <strong>Discount Rate: </strong> {formatEther(auction.discountRate).toString()}{" "}
-                  </p>
-                  <p>
-                    <strong>Ongoing: </strong> {auction.onGoing.toString()}{" "}
                   </p>
                   <p>
                     <a

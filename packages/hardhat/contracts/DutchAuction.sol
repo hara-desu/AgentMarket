@@ -48,7 +48,8 @@ contract DutchAuction {
     }
 
     modifier onGoing(uint256 _token) {
-        require(auctions[_token].onGoing == true, "The auction isn't active.");
+        uint256 timeLeft = getTimeLeft(_token);
+        require(timeLeft != 0, "The auction isn't active.");
         _;
     }
 
@@ -59,7 +60,8 @@ contract DutchAuction {
         uint256 StartAt,
         uint256 ExpiresAt,
         uint256 StartingPrice,
-        uint256 DiscountRate
+        uint256 DiscountRate,
+        bool onGoing
     );
 
     event auctionEnded(uint256 AgentId, address Seller, address Buyer, uint256 Price);
@@ -70,7 +72,12 @@ contract DutchAuction {
     }
 
     function auctionActive(uint256 _tokenId) public view returns (bool) {
-        return auctions[_tokenId].onGoing;
+        uint256 timeLeft = getTimeLeft(_tokenId);
+        if (timeLeft == 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     function getAuction(uint256 _id) public view returns (Auction memory) {
@@ -117,7 +124,8 @@ contract DutchAuction {
             block.timestamp,
             auctions[_AIagentId].expiresAt,
             _startingPrice,
-            _discountRate
+            _discountRate,
+            auctions[_AIagentId].onGoing
         );
     }
 

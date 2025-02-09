@@ -1408,7 +1408,7 @@ const deployedContracts = {
   },
   11155111: {
     AIagentNFT: {
-      address: "0xa3fE936088c96E2804A06b01B83DE391629Db57b",
+      address: "0x13A59304be6413e0270C464De6941aEFB7e9e6a1",
       abi: [
         {
           inputs: [],
@@ -2442,7 +2442,7 @@ const deployedContracts = {
       },
     },
     DutchAuction: {
-      address: "0x4f98131fa1aCad7Bdb8C0Db5CF51285C18ab356a",
+      address: "0xDB7e3086B8a233FE8bE93872F23Eee612Ca63ef3",
       abi: [
         {
           inputs: [
@@ -2524,6 +2524,12 @@ const deployedContracts = {
               internalType: "uint256",
               name: "DiscountRate",
               type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "onGoing",
+              type: "bool",
             },
           ],
           name: "auctionStarted",
